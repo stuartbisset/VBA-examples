@@ -1,0 +1,106 @@
+Sub FilterModuleEnrol()
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'Purpose:         To Filter the data on a sheet to make it more userfriendly for data entry
+'
+'Parent Procs:    none
+'Child Procs:     none
+'
+'Author           Date              Action
+'Stuart Bisset    24/05/2018        Created
+'
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'DECLARE VARIABLES
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Dim sCalc As String
+Dim wbk As Workbook
+Dim wks As Worksheet
+Dim sErrUnexpected As String
+Dim sErrTitle As String
+Dim sErrCodeMsg As String
+Dim rLevel As Range
+Dim rModule As Range
+Dim rAFRange As Range
+Dim rFilterHeaders As Range
+Dim wf As WorksheetFunction
+Dim lField1 As Long
+Dim lField2 As Long
+
+
+On Error GoTo errTrap
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'SET VARIABLES
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Set wbk = ActiveWorkbook
+Set wks = wbk.ActiveSheet
+sErrTitle = ""
+sErrUnexpected = "An unexpected error occurred.  Please contact Stuart Bisset."
+sErrCodeMsg = "  The error code was - "
+Set rLevel = wbk.Names("vbaMEFilterLevel").RefersToRange
+Set rModule = wbk.Names("vbaMEFilterModule").RefersToRange
+Set rAFRange = wbk.Names("vbaMEFilterRng").RefersToRange
+Set rFilterHeaders = wbk.Names("vbaFilterHeaders").RefersToRange
+Set wf = Application.WorksheetFunction
+lField1 = wf.Match("Level", rFilterHeaders, 0)
+lField2 = wf.Match("Module Code", rFilterHeaders, 0)
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'SETUP ENVIRONMENT
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Application.ScreenUpdating = False
+'sCalc = Application.Calculation
+'Application.Calculation = xlCalculationManual
+'Application.Calculate
+'Call UnprotectSheet(ActiveSheet)
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'MAIN BODY OF PROCEDURE
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    'clear all filters if there are any - code not currently required
+    'On Error Resume Next
+    '    ActiveSheet.ShowAllData
+    'On Error GoTo errTrap
+    
+    Select Case wks.AutoFilterMode
+    Case Is = True
+        rAFRange.AutoFilter 'switches off autofilter
+        rAFRange.AutoFilter 'switches on autofilter
+    Case Is = False
+        rAFRange.AutoFilter 'switches on autofilter
+    End Select
+    
+    'now activate filter
+    
+    If rLevel.Value <> "" Then rAFRange.AutoFilter Field:=lField1, Criteria1:=rLevel.Value
+    If rModule.Value <> "" Then rAFRange.AutoFilter Field:=lField2, Criteria1:=rModule.Value
+    
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'END OF MAIN BODY OF PROCEDURE
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'ERROR HANDLING
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+errTrap:
+If Err.Number <> 0 Then
+    'this code runs on error....
+    MsgBox sErrUnexpected & sErrCodeMsg & Err.Number & " - " & Err.Description, vbOKOnly, sErrTitle
+End If
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+' FROM HERE ON - this code runs with or without error...
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'RESTORE ENVIRONMENT
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Application.ScreenUpdating = True
+'Application.Calculation = sCalc
+'Application.StatusBar = False
+'Call ProtectSheet(ActiveSheet)
+
+End Sub
